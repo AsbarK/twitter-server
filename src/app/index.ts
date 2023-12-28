@@ -6,6 +6,7 @@ import { Users } from './user';
 import cors from 'cors'
 import { GraphqlContext } from '../interfaces';
 import JWTServices from '../services/jwt';
+import { Tweet } from './tweet';
 
 
 export async function initServer(){
@@ -16,14 +17,27 @@ export async function initServer(){
     const graphQlServer = new ApolloServer<GraphqlContext>({
         typeDefs:`
             ${Users.types}
+            ${Tweet.types}
             type Query{
                 ${Users.querys}
+                ${Tweet.queries}
+            }
+            type Mutation {
+                ${Tweet.mutations}
             }
         `,
         resolvers:{
             Query:{
-                ...Users.resolvers.queries
-            }
+                ...Users.resolvers.queries,
+                ...Tweet.resolvers.queries
+            },
+            Mutation:{
+                ...Tweet.resolvers.mutations
+            },
+            ...Tweet.resolvers.extraResolvers,
+            ...Users.resolvers.extraResolvers
+            
+            
         },
     });
 
