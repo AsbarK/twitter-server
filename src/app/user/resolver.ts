@@ -28,8 +28,34 @@ const extraResolvers ={
     User:{
         tweets: async(parent:User)=>{
             return await prismaClient.tweet.findMany({where:{authorId:parent.id}})
+        },
+        followers: async(parent:User)=>{ 
+            const result =  await prismaClient.follow.findMany({where:{following:{id:parent.id}},include:{follower:true,following:true}})
+            return result.map((res)=>{
+                return res.follower
+            })
+        },
+        following: async(parent:User)=>{
+            const result =  await prismaClient.follow.findMany({where:{follower:{id:parent.id}},include:{follower:true,following:true}})
+            return result.map((res)=>{
+                return res.following
+            })
         }
     }
 }
 
-export const resolvers = {queries,extraResolvers}
+const mutations ={
+    followUser:async (parent:any,{to}:{to:string},ctx:GraphqlContext) => {
+        if(!ctx.user || !ctx.user.id) throw new Error('Not Authorized')
+        await UserServices.followUserService(ctx.user.id,to)
+        return true
+    },
+    unFollowUser:async (parent:any,{to}:{to:string},ctx:GraphqlContext) => {
+        if(!ctx.user || !ctx.user.id) throw new Error('Not Authorized')
+        await UserServices.unFollowUserService(ctx.user.id,to)
+        return true
+    }
+
+}
+
+export const resolvers = {queries,extraResolvers,mutations}
