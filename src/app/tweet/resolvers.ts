@@ -1,5 +1,4 @@
 import { Tweet } from "@prisma/client"
-import { prismaClient } from "../../client/db"
 import { GraphqlContext } from "../../interfaces"
 import {S3Client,PutObjectCommand} from "@aws-sdk/client-s3"
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
@@ -25,7 +24,7 @@ const mutations = {
 }
 const queries = {
     GetAllTweets:async(parent:any,args:any,ctx:GraphqlContext)=>{
-        return TweetServices.getAllTweetsService()
+        return await TweetServices.getAllTweetsService()
     },
     GetSignedUrls:async (parent:any,{imageType}:{imageType:String},ctx:GraphqlContext) => {
         if(!ctx.user || !ctx.user.id) throw new Error('UnAuthorized')
